@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema de Chamados</title>
+<style>
+:root{color-scheme:light dark;--bg:#eef2f1;--sf:#fff;--tx:#14211f;--mu:#5c6f6b;--bd:#d5dedc;--ac:#0f6b62;--acx:#fff;--ok:#1a7f4b;--wr:#b45309;--er:#c0392b;--in:#2457c5}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1514;--sf:#162120;--tx:#e6efed;--mu:#93a8a4;--bd:#263634;--ac:#4fc3b5;--acx:#08201d;--ok:#4cc38a;--wr:#f0b35a;--er:#ff7b6b;--in:#7ea2ff}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);display:grid;grid-template-columns:210px 1fr;min-height:100vh}
+aside{background:var(--sf);border-right:1px solid var(--bd);padding:20px 12px;position:sticky;top:0;height:100vh}
+aside h1{font-size:17px;margin:0 8px 18px;letter-spacing:-.2px}
+aside small{display:block;color:var(--mu);font-weight:400;font-size:12px}
+nav a{display:block;padding:8px 10px;border-radius:6px;color:var(--tx);text-decoration:none;margin-bottom:2px}
+nav a:hover{background:var(--bg)}
+nav a.on{background:var(--ac);color:var(--acx);font-weight:600}
+main{padding:28px 32px;max-width:1100px;width:100%}
+h2{font-size:22px;margin:0;letter-spacing:-.3px}
+h3{font-size:15px;margin:0 0 10px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:16px;margin-bottom:16px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{font-size:13px;color:var(--mu);font-weight:600}
+td.w{white-space:normal;min-width:180px}
+tr:last-child td{border:0}
+.btn{display:inline-block;font:inherit;font-size:14px;padding:7px 13px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--ac)}
+.btn.p{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:600}
+.btn.d{color:var(--er)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+:focus-visible{outline:2px solid var(--in);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+label{display:block;font-size:13px;color:var(--mu);margin-bottom:4px}
+input,select,textarea{font:inherit;width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx)}
+textarea{min-height:90px;resize:vertical}
+.fg{margin-bottom:14px;max-width:520px}
+.fl{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.fl>div{min-width:150px;flex:1}
+.b{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent)}
+.ABERTO{--c:var(--ok)}.EM_ATENDIMENTO{--c:var(--in)}.AGUARDANDO_CLIENTE{--c:var(--wr)}.FECHADO{--c:var(--mu)}
+.BAIXA{--c:var(--mu)}.MEDIA{--c:var(--in)}.ALTA{--c:var(--wr)}.CRITICA{--c:var(--er)}
+.ADMIN{--c:var(--in)}.TECNICO{--c:var(--ok)}
+.pipe{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:16px;border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:var(--sf)}
+.pipe div{padding:16px;border-right:1px solid var(--bd);border-top:4px solid var(--c)}
+.pipe div:last-child{border-right:0}
+.pipe strong{display:block;font-size:30px;line-height:1.1}
+.pipe span{color:var(--mu);font-size:13px}
+.bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--c)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.br{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.br span:first-child{width:140px;font-size:13px}
+.br span:last-child{width:24px;text-align:right}
+dl{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;margin:0}
+dt{color:var(--mu);font-size:13px}
+dd{margin:0}
+.cm{border-left:3px solid var(--bd);padding:2px 0 2px 12px;margin-bottom:12px}
+.cm small{color:var(--mu)}
+.empty{color:var(--mu);padding:14px 0}
+.placeholder{color:var(--mu);font-style:italic}
+.page{display:none}
+.page.active{display:block}
+@media(max-width:760px){body{grid-template-columns:1fr}aside{position:static;height:auto;border:0;border-bottom:1px solid var(--bd);padding:12px}nav{display:flex;flex-wrap:wrap;gap:4px}main{padding:18px 14px}.pipe{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}dl{grid-template-columns:1fr}}
+.page a:not(.btn){color:var(--ac)}
+#toast{position:fixed;right:20px;bottom:20px;max-width:380px;padding:11px 16px;border-radius:8px;background:var(--ok);color:#fff;font-size:14px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:9}
+#toast.show{opacity:1;transform:none}
+#toast.err{background:var(--er)}
+.btn.d{border-color:var(--bd)}
+</style>
+</head>
+<body>
+<aside>
+  <h1>Chamados<small>Sistema de atendimento</small></h1>
+  <nav>
+    <a href="#dashboard" data-page="dashboard" class="on">Dashboard</a>
+    <a href="#clientes" data-page="clientes">Clientes</a>
+    <a href="#categorias" data-page="categorias">Categorias</a>
+    <a href="#tecnicos" data-page="tecnicos">Técnicos</a>
+    <a href="#chamados" data-page="chamados">Chamados</a>
+  </nav>
+</aside>
+
+<main>
+  <section class="page active" id="page-dashboard">
+    <div class="hd"><h2>Dashboard</h2><a class="btn p" href="#chamado-novo">Abrir chamado</a></div>
+    <div class="pipe" id="d-pipe"></div>
+    <div class="g2">
+      <div class="card"><h3>Chamados por prioridade</h3><div id="d-prio"></div></div>
+      <div class="card"><h3>Cadastros</h3><dl id="d-cad"></dl></div>
+    </div>
+    <div class="card"><h3>Chamados mais recentes</h3><div class="tw" id="d-recentes"></div></div>
+  </section>
+
+  <section class="page" id="page-clientes">
+    <div class="hd"><h2>Clientes</h2><a class="btn p" href="#cliente-novo">Novo cliente</a></div>
+    <div class="card"><div class="tw"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Ações</th></tr></thead>
+      <tbody id="tb-clientes"></tbody></table></div></div>
+  </section>
+
+  <section class="page" id="page-categorias">
+    <div class="hd"><h2>Categorias</h2><a class="btn p" href="#categoria-nova">Nova categoria</a></div>
+    <div class="card"><div class="tw"><table><thead><tr><th>Nome</th><th>Descrição</th><th>Ações</th></tr></thead>
+      <tbody id="tb-categorias"></tbody></table></div></div>
+  </section>
+
+  <section class="page" id="page-tecnicos">
+    <div class="hd"><h2>Técnicos</h2><a class="btn p" href="#tecnico-novo">Novo técnico</a></div>
+    <div class="card"><div class="tw"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Ações</th></tr></thead>
+      <tbody id="tb-tecnicos"></tbody></table></div></div>
+  </section>
+
+  <section class="page" id="page-chamados">
+    <div class="hd"><h2>Chamados</h2><a class="btn p" href="#chamado-novo">Novo chamado</a></div>
+    <div class="card">
+      <div class="fl">
+        <div><label for="f-status">Status</label><select id="f-status"><option value="">Todos</option><option value="ABERTO">Aberto</option><option value="EM_ATENDIMENTO">Em atendimento</option><option value="AGUARDANDO_CLIENTE">Aguardando cliente</option><option value="FECHADO">Fechado</option></select></div>
+        <div><label for="f-prioridade">Prioridade</label><select id="f-prioridade"><option value="">Todos</option><option value="BAIXA">Baixa</option><option value="MEDIA">Média</option><option value="ALTA">Alta</option><option value="CRITICA">Crítica</option></select></div>
+        <div><label for="f-cliente">Cliente</label><select id="f-cliente"><option value="">Todos</option></select></div>
+      </div>
+      <div class="tw"><table><thead><tr><th>Título</th><th>Cliente</th><th>Prioridade</th><th>Status</th><th>Aberto em</th></tr></thead>
+        <tbody id="tb-chamados"></tbody></table></div>
+      <div class="row" style="margin-top:12px"><button class="btn" type="button" id="pg-prev" disabled>Anterior</button><span id="pg-info">Página — de —</span><button class="btn" type="button" id="pg-next" disabled>Próxima</button></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-chamado">
+    <div id="chamado-detalhe"></div>
+  </section>
+
+  <section class="page" id="page-cliente-novo">
+    <div class="hd"><h2>Novo cliente</h2></div>
+    <form class="card" data-form="cliente">
+      <div class="fg"><label for="cliente-nome">Nome *</label><input id="cliente-nome" name="nome" maxlength="100" placeholder="Nome do cliente"></div>
+      <div class="fg"><label for="cliente-email">E-mail *</label><input id="cliente-email" name="email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="fg"><label for="cliente-telefone">Telefone</label><input id="cliente-telefone" name="telefone" maxlength="20" placeholder="Telefone"></div>
+      <div class="row"><button class="btn p" type="submit">Salvar</button><a class="btn" href="#clientes">Cancelar</a></div>
+    </form>
+  </section>
+
+  <section class="page" id="page-categoria-nova">
+    <div class="hd"><h2>Nova categoria</h2></div>
+    <form class="card" data-form="categoria">
+      <div class="fg"><label for="categoria-nome">Nome *</label><input id="categoria-nome" name="nome" maxlength="100" placeholder="Nome da categoria"></div>
+      <div class="fg"><label for="categoria-descricao">Descrição</label><textarea id="categoria-descricao" name="descricao" maxlength="255" placeholder="Descrição da categoria"></textarea></div>
+      <div class="row"><button class="btn p" type="submit">Salvar</button><a class="btn" href="#categorias">Cancelar</a></div>
+    </form>
+  </section>
+
+  <section class="page" id="page-tecnico-novo">
+    <div class="hd"><h2>Novo técnico</h2></div>
+    <form class="card" data-form="tecnico">
+      <div class="fg"><label for="tecnico-nome">Nome *</label><input id="tecnico-nome" name="nome" maxlength="100" placeholder="Nome do técnico"></div>
+      <div class="fg"><label for="tecnico-email">E-mail *</label><input id="tecnico-email" name="email" type="email" maxlength="120" placeholder="email@exemplo.com"></div>
+      <div class="fg"><label for="tecnico-perfil">Perfil *</label><select id="tecnico-perfil" name="perfil"><option value="">Selecione</option><option value="ADMIN">Administrador</option><option value="TECNICO">Técnico</option></select></div>
+      <div class="row"><button class="btn p" type="submit">Salvar</button><a class="btn" href="#tecnicos">Cancelar</a></div>
+    </form>
+  </section>
+
+  <section class="page" id="page-chamado-novo">
+    <div class="hd"><h2>Novo chamado</h2></div>
+    <form class="card" data-form="chamado">
+      <div class="fg"><label for="chamado-titulo">Título *</label><input id="chamado-titulo" name="titulo" maxlength="150" placeholder="Título do chamado"></div>
+      <div class="fg"><label for="chamado-descricao">Descrição *</label><textarea id="chamado-descricao" name="descricao" maxlength="2000" placeholder="Descreva o problema"></textarea></div>
+      <div class="fg"><label for="chamado-prioridade">Prioridade *</label><select id="chamado-prioridade" name="prioridade"><option value="">Selecione</option><option value="BAIXA">Baixa</option><option value="MEDIA">Média</option><option value="ALTA">Alta</option><option value="CRITICA">Crítica</option></select></div>
+      <div class="fg"><label for="chamado-cliente">Cliente *</label><select id="chamado-cliente" name="clienteId"><option value="">Selecione um cliente</option></select></div>
+      <div class="fg"><label for="chamado-categoria">Categoria *</label><select id="chamado-categoria" name="categoriaId"><option value="">Selecione uma categoria</option></select></div>
+      <div class="fg"><label for="chamado-tecnico">Técnico</label><select id="chamado-tecnico" name="tecnicoId"><option value="">Sem técnico</option></select></div>
+      <div class="row"><button class="btn p" type="submit">Salvar chamado</button><a class="btn" href="#chamados">Cancelar</a></div>
+    </form>
+  </section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Utilitários ===== */
+const LABEL = {
+  status: { ABERTO: 'Aberto', EM_ATENDIMENTO: 'Em atendimento', AGUARDANDO_CLIENTE: 'Aguardando cliente', FECHADO: 'Fechado' },
+  prioridade: { BAIXA: 'Baixa', MEDIA: 'Média', ALTA: 'Alta', CRITICA: 'Crítica' },
+  perfil: { ADMIN: 'Administrador', TECNICO: 'Técnico' }
+};
+// Espelha StatusChamado.podeIrPara (o back-end continua sendo a autoridade).
+const TRANSICOES = {
+  ABERTO: ['EM_ATENDIMENTO', 'FECHADO'],
+  EM_ATENDIMENTO: ['AGUARDANDO_CLIENTE', 'FECHADO'],
+  AGUARDANDO_CLIENTE: ['EM_ATENDIMENTO', 'FECHADO'],
+  FECHADO: []
+};
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const badge = (tipo, v) => `<span class="b ${esc(v)}">${esc(LABEL[tipo][v] ?? v)}</span>`;
+const data = s => s ? new Date(s).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+const vazio = (cols, msg) => `<tr><td colspan="${cols}" class="empty">${msg}</td></tr>`;
+const options = (lista, rotulo, extra = '') => `<option value="">${esc(rotulo)}</option>` + lista.map(i => `<option value="${i.id}">${esc(i.nome)}${extra && i[extra] ? ' — ' + esc(i[extra]) : ''}</option>`).join('');
+
+let toastTimer;
+function aviso(msg, erro = false) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'show' + (erro ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', erro ? 6000 : 3000);
+}
+
+// Camada única de acesso à API (mesma origem: o front é servido pelo próprio Spring Boot).
+async function api(path, { method = 'GET', body } = {}) {
+  let res;
+  try {
+    res = await fetch(path, {
+      method,
+      headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+      body: body !== undefined ? JSON.stringify(body) : undefined
+    });
+  } catch {
+    throw new Error('Não foi possível conectar à API. O servidor está rodando?');
+  }
+  if (res.status === 204) return null;
+  let json = null;
+  try { json = await res.json(); } catch { /* corpo vazio ou não-JSON */ }
+  if (!res.ok) {
+    const det = json?.detalhes?.length ? ' (' + json.detalhes.join('; ') + ')' : '';
+    throw new Error((json?.erro || `Erro ${res.status}`) + det);
+  }
+  return json;
+}
+const falha = e => aviso(e.message, true);
+
+/* ===== Dashboard ===== */
+async function carregarDashboard() {
+  const st = Object.keys(LABEL.status), pr = Object.keys(LABEL.prioridade);
+  const [porStatus, porPrio, recentes, clientes, categorias, tecnicos] = await Promise.all([
+    Promise.all(st.map(s => api(`/chamados?status=${s}&size=1`))),
+    Promise.all(pr.map(p => api(`/chamados?prioridade=${p}&size=1`))),
+    api('/chamados?size=5'),
+    api('/clientes'), api('/categorias'), api('/tecnicos')
+  ]);
+  const total = porStatus.reduce((s, r) => s + r.totalElementos, 0);
+  $('#d-pipe').innerHTML = st.map((s, i) => `<div class="${s}"><strong>${porStatus[i].totalElementos}</strong><span>${LABEL.status[s]}</span></div>`).join('');
+  $('#d-prio').innerHTML = pr.map((p, i) => {
+    const n = porPrio[i].totalElementos;
+    return `<div class="br"><span>${LABEL.prioridade[p]}</span><div class="bar ${p}"><i style="width:${total ? n / total * 100 : 0}%"></i></div><span>${n}</span></div>`;
+  }).join('');
+  $('#d-cad').innerHTML = `<dt>Clientes</dt><dd>${clientes.length}</dd><dt>Categorias</dt><dd>${categorias.length}</dd><dt>Técnicos</dt><dd>${tecnicos.length}</dd><dt>Chamados</dt><dd>${total}</dd>`;
+  $('#d-recentes').innerHTML = recentes.conteudo.length
+    ? `<table><thead><tr><th>Título</th><th>Cliente</th><th>Prioridade</th><th>Status</th><th>Aberto em</th></tr></thead><tbody>${recentes.conteudo.map(linhaChamado).join('')}</tbody></table>`
+    : '<p class="empty">Nenhum chamado ainda.</p>';
+}
+
+/* ===== Listagens ===== */
+const acoes = (rota, tipo, id) => `<a class="btn" href="#${rota}/${id}">Editar</a> <button class="btn d" type="button" data-excluir="${tipo}" data-id="${id}">Excluir</button>`;
+
+async function carregarClientes() {
+  const lista = await api('/clientes');
+  $('#tb-clientes').innerHTML = lista.length ? lista.map(c =>
+    `<tr><td>${esc(c.nome)}</td><td>${esc(c.email)}</td><td>${esc(c.telefone) || '—'}</td><td>${acoes('cliente-novo', 'clientes', c.id)}</td></tr>`).join('')
+    : vazio(4, 'Nenhum cliente cadastrado.');
+}
+async function carregarCategorias() {
+  const lista = await api('/categorias');
+  $('#tb-categorias').innerHTML = lista.length ? lista.map(c =>
+    `<tr><td>${esc(c.nome)}</td><td class="w">${esc(c.descricao) || '—'}</td><td>${acoes('categoria-nova', 'categorias', c.id)}</td></tr>`).join('')
+    : vazio(3, 'Nenhuma categoria cadastrada.');
+}
+async function carregarTecnicos() {
+  const lista = await api('/tecnicos');
+  $('#tb-tecnicos').innerHTML = lista.length ? lista.map(t =>
+    `<tr><td>${esc(t.nome)}</td><td>${esc(t.email)}</td><td>${badge('perfil', t.perfil)}</td><td>${acoes('tecnico-novo', 'tecnicos', t.id)}</td></tr>`).join('')
+    : vazio(4, 'Nenhum técnico cadastrado.');
+}
+
+const linhaChamado = c => `<tr><td class="w"><a href="#chamado/${c.id}">${esc(c.titulo)}</a></td><td>${esc(c.clienteNome)}</td><td>${badge('prioridade', c.prioridade)}</td><td>${badge('status', c.status)}</td><td>${data(c.dataAbertura)}</td></tr>`;
+
+let paginaChamados = 0;
+async function carregarChamados() {
+  // Preenche o filtro de clientes mantendo a seleção atual
+  const sel = $('#f-cliente'), atual = sel.value;
+  sel.innerHTML = options(await api('/clientes'), 'Todos');
+  sel.value = atual;
+
+  const q = new URLSearchParams({ page: paginaChamados, size: 10 });
+  [['status', '#f-status'], ['prioridade', '#f-prioridade'], ['clienteId', '#f-cliente']]
+    .forEach(([k, s]) => { if ($(s).value) q.set(k, $(s).value); });
+  const r = await api('/chamados?' + q);
+  $('#tb-chamados').innerHTML = r.conteudo.length ? r.conteudo.map(linhaChamado).join('') : vazio(5, 'Nenhum chamado encontrado.');
+  const total = Math.max(r.totalPaginas, 1);
+  $('#pg-info').textContent = `Página ${r.pagina + 1} de ${total}`;
+  $('#pg-prev').disabled = r.pagina <= 0;
+  $('#pg-next').disabled = r.pagina + 1 >= total;
+}
+['#f-status', '#f-prioridade', '#f-cliente'].forEach(s => $(s).addEventListener('change', () => { paginaChamados = 0; carregarChamados().catch(falha); }));
+$('#pg-prev').addEventListener('click', () => { paginaChamados--; carregarChamados().catch(falha); });
+$('#pg-next').addEventListener('click', () => { paginaChamados++; carregarChamados().catch(falha); });
+
+/* ===== Detalhe do chamado ===== */
+async function carregarDetalhe(id) {
+  if (!id) { location.hash = '#chamados'; return; }
+  const [c, tecnicos] = await Promise.all([api(`/chamados/${id}`), api('/tecnicos')]);
+  const fechado = c.status === 'FECHADO';
+  $('#chamado-detalhe').innerHTML = `
+    <div class="hd"><h2>#${c.id} — ${esc(c.titulo)}</h2>
+      <div class="row">${fechado ? '' : `<a class="btn" href="#chamado-novo/${c.id}">Editar</a>`}
+      <button class="btn d" type="button" data-excluir="chamados" data-id="${c.id}">Excluir</button>
+      <a class="btn" href="#chamados">Voltar</a></div></div>
+    <div class="card"><dl>
+      <dt>Status</dt><dd>${badge('status', c.status)}</dd>
+      <dt>Prioridade</dt><dd>${badge('prioridade', c.prioridade)}</dd>
+      <dt>Cliente</dt><dd>${esc(c.clienteNome)}</dd>
+      <dt>Categoria</dt><dd>${esc(c.categoriaNome)}</dd>
+      <dt>Técnico</dt><dd>${esc(c.tecnicoNome) || '<span class="placeholder">Sem técnico</span>'}</dd>
+      <dt>Aberto em</dt><dd>${data(c.dataAbertura)}</dd>
+      <dt>Fechado em</dt><dd>${data(c.dataFechamento)}</dd>
+      <dt>Descrição</dt><dd style="white-space:pre-wrap">${esc(c.descricao)}</dd>
+    </dl></div>
+    <div class="card"><h3>Ações</h3>
+      ${fechado ? '<p class="empty" style="padding:0">Chamado fechado: não pode mais ser alterado.</p>' : `
+      <div class="row" style="margin-bottom:14px"><span>Mudar status:</span>
+        ${TRANSICOES[c.status].map(s => `<button class="btn ${s === 'FECHADO' ? 'd' : ''}" type="button" data-status="${s}" data-id="${c.id}">${LABEL.status[s]}</button>`).join('')}</div>
+      <div class="row"><select id="sel-tecnico" style="max-width:260px" aria-label="Técnico">${options(tecnicos, 'Selecione um técnico')}</select>
+        <button class="btn" type="button" data-atribuir="${c.id}">Atribuir técnico</button></div>`}
+    </div>
+    <div class="card"><h3>Comentários (${c.comentarios.length})</h3>
+      ${c.comentarios.length ? c.comentarios.map(m => `<div class="cm"><small>${esc(m.autor)} · ${data(m.data)}</small><div style="white-space:pre-wrap">${esc(m.texto)}</div></div>`).join('') : '<p class="empty" style="padding:0 0 12px">Nenhum comentário.</p>'}
+      <form id="form-comentario" data-id="${c.id}">
+        <div class="fg"><label for="com-autor">Autor *</label><input id="com-autor" name="autor" maxlength="100"></div>
+        <div class="fg"><label for="com-texto">Comentário *</label><textarea id="com-texto" name="texto" maxlength="1000"></textarea></div>
+        <button class="btn p" type="submit">Comentar</button>
+      </form>
+    </div>`;
+  if (c.tecnicoId) $('#sel-tecnico') && ($('#sel-tecnico').value = c.tecnicoId);
+}
+
+/* ===== Formulários (criar / editar) ===== */
+const FORMS = {
+  cliente:   { base: '/clientes',   lista: '#clientes',   t: ['Novo cliente', 'Editar cliente'],
+               corpo: f => ({ nome: f.nome.trim(), email: f.email.trim(), telefone: f.telefone.trim() || null }) },
+  categoria: { base: '/categorias', lista: '#categorias', t: ['Nova categoria', 'Editar categoria'],
+               corpo: f => ({ nome: f.nome.trim(), descricao: f.descricao.trim() || null }) },
+  tecnico:   { base: '/tecnicos',   lista: '#tecnicos',   t: ['Novo técnico', 'Editar técnico'],
+               corpo: f => ({ nome: f.nome.trim(), email: f.email.trim(), perfil: f.perfil || null }) },
+  chamado:   { base: '/chamados',   lista: '#chamados',   t: ['Novo chamado', 'Editar chamado'],
+               corpo: f => ({ titulo: f.titulo.trim(), descricao: f.descricao.trim(), prioridade: f.prioridade || null,
+                              clienteId: f.clienteId ? +f.clienteId : null, categoriaId: f.categoriaId ? +f.categoriaId : null,
+                              tecnicoId: f.tecnicoId ? +f.tecnicoId : null }) }
+};
+
+async function abrirFormulario(tipo, id) {
+  const cfg = FORMS[tipo], form = document.querySelector(`form[data-form="${tipo}"]`);
+  form.reset();
+  form.dataset.id = id || '';
+  form.closest('.page').querySelector('h2').textContent = cfg.t[id ? 1 : 0];
+  if (tipo === 'chamado') {
+    const [cl, ca, te] = await Promise.all([api('/clientes'), api('/categorias'), api('/tecnicos')]);
+    $('#chamado-cliente').innerHTML = options(cl, 'Selecione um cliente');
+    $('#chamado-categoria').innerHTML = options(ca, 'Selecione uma categoria');
+    $('#chamado-tecnico').innerHTML = options(te, 'Sem técnico', 'perfil');
+  }
+  if (id) {
+    const d = await api(`${cfg.base}/${id}`);
+    if (d.status === 'FECHADO') { aviso('Chamado fechado não pode ser alterado.', true); location.hash = `#chamado/${id}`; return; }
+    Object.keys(d).forEach(k => { if (form.elements[k]) form.elements[k].value = d[k] ?? ''; });
+  }
+}
+
+document.addEventListener('submit', async e => {
+  const form = e.target;
+  e.preventDefault();
+  const btn = form.querySelector('button[type=submit]');
+  if (btn) btn.disabled = true;
+  try {
+    if (form.id === 'form-comentario') {
+      const f = Object.fromEntries(new FormData(form));
+      await api(`/chamados/${form.dataset.id}/comentarios`, { method: 'POST', body: { autor: f.autor.trim(), texto: f.texto.trim() } });
+      aviso('Comentário adicionado.');
+      await carregarDetalhe(form.dataset.id);
+    } else if (form.dataset.form) {
+      const cfg = FORMS[form.dataset.form], id = form.dataset.id;
+      const body = cfg.corpo(Object.fromEntries(new FormData(form)));
+      const salvo = await api(id ? `${cfg.base}/${id}` : cfg.base, { method: id ? 'PUT' : 'POST', body });
+      aviso('Salvo com sucesso.');
+      location.hash = form.dataset.form === 'chamado' ? `#chamado/${salvo.id}` : cfg.lista;
+    }
+  } catch (err) { falha(err); }
+  finally { if (btn) btn.disabled = false; }
+});
+
+/* ===== Ações por delegação de eventos (excluir, status, atribuir) ===== */
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-excluir],[data-status],[data-atribuir]');
+  if (!el) return;
+  try {
+    if (el.dataset.excluir) {
+      if (!confirm('Confirma a exclusão deste registro?')) return;
+      await api(`/${el.dataset.excluir}/${el.dataset.id}`, { method: 'DELETE' });
+      aviso('Registro excluído.');
+      el.dataset.excluir === 'chamados' ? (location.hash = '#chamados') : await navegar();
+    } else if (el.dataset.status) {
+      await api(`/chamados/${el.dataset.id}/status`, { method: 'PATCH', body: { status: el.dataset.status } });
+      aviso('Status atualizado.');
+      await carregarDetalhe(el.dataset.id);
+    } else if (el.dataset.atribuir) {
+      const tecnicoId = +$('#sel-tecnico').value;
+      if (!tecnicoId) return aviso('Selecione um técnico.', true);
+      await api(`/chamados/${el.dataset.atribuir}/atribuir`, { method: 'PATCH', body: { tecnicoId } });
+      aviso('Técnico atribuído.');
+      await carregarDetalhe(el.dataset.atribuir);
+    }
+  } catch (err) { falha(err); }
+});
+
+/* ===== Navegação por hash: #rota ou #rota/id ===== */
+const paginas = [...document.querySelectorAll('.page')];
+const links = [...document.querySelectorAll('nav a')];
+const MENU = r => r.startsWith('cliente') ? 'clientes' : r.startsWith('categoria') ? 'categorias' : r.startsWith('tecnico') ? 'tecnicos' : r.startsWith('chamado') ? 'chamados' : 'dashboard';
+const CARREGAR = {
+  dashboard: carregarDashboard, clientes: carregarClientes, categorias: carregarCategorias,
+  tecnicos: carregarTecnicos, chamados: carregarChamados, chamado: carregarDetalhe,
+  'cliente-novo': id => abrirFormulario('cliente', id), 'categoria-nova': id => abrirFormulario('categoria', id),
+  'tecnico-novo': id => abrirFormulario('tecnico', id), 'chamado-novo': id => abrirFormulario('chamado', id)
+};
+
+async function navegar() {
+  const [rota0, id] = (location.hash || '#dashboard').slice(1).split('/');
+  const rota = document.getElementById(`page-${rota0}`) ? rota0 : 'dashboard';
+  paginas.forEach(p => p.classList.toggle('active', p.id === `page-${rota}`));
+  links.forEach(l => l.classList.toggle('on', l.dataset.page === MENU(rota)));
+  window.scrollTo(0, 0);
+  try { await CARREGAR[rota](id); } catch (err) { falha(err); }
+}
+window.addEventListener('hashchange', navegar);
+navegar();
+</script>
+</body>
+</html>
